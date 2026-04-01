@@ -13,19 +13,20 @@
       "matchStrings": [
         "(?<currentValue>[0-9.]+)"
       ],
-      "depNameTemplate": "TODO_DEP_NAME",
-      "datasourceTemplate": "TODO_DATASOURCE",
+      "depNameTemplate": "anomalyco/opencode",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$",
       "versioningTemplate": "semver"
     }
   ],
   "baseBranchPatterns": [
-    "TODO_BRANCH"
+    "1.3"
   ],
   "packageRules": [
     {
-      "matchPackageNames": ["TODO_DEP_NAME"],
-      "matchBaseBranches": ["TODO_BRANCH"],
-      "allowedVersions": "/^TODO_VERSION_PREFIX\\./"
+      "matchPackageNames": ["anomalyco/opencode"],
+      "matchBaseBranches": ["1.3"],
+      "allowedVersions": "/^1\\.3\\./"
     }
   ]
 }

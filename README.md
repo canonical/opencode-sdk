@@ -1,97 +1,8 @@
-<!--
-# SDK README Template for Workshop
+# OpenCode SDK for Workshop
 
-OVERALL DESIGN (for sdkcraft.yaml description field):
-
-The sdkcraft.yaml `description` field should match the README overview
-paragraph so it can be reused in `sdk info` output. Write it as a short YAML
-multiline string — no sub-headings, no bullet lists. Follow this pattern:
-
-description: |
-  This SDK provides [toolchain/runtime] for [purpose].
-  [Key resources] are persisted on the host to speed up [builds/installs]
-  across workshop updates.
-
-Examples from approved SDKs:
-
-  # go
-  description: |
-    This SDK provides the official Go toolchain for efficient Go
-    development. Module downloads are persisted on the host to speed up builds
-    across workshop updates, and Go environment settings are preserved between
-    workshop updates.
-
-  # node
-  description: |
-    This SDK provides a complete Node.js development environment built from
-    source, with Corepack enabled for flexible package manager choice. Package
-    manager caches are persisted on the host to speed up dependency
-    installations across workshop updates.
-
-README TEMPLATE INSTRUCTIONS:
-
-1. Copy this file to your SDK repository directory as README.md
-2. Replace all placeholders in [SQUARE BRACKETS] with your actual content;
-   replace XYZ, FOO, BAR with real product names
-3. Remove any sections that don't apply to your SDK for simplicity
-4. Delete this comment block before publishing
-5. Test all command examples before publishing
-
-Focus on the SDK's behavior, not the target library/framework documentation.
-Link to upstream docs for product-related specifics.
-
-Do NOT include "Installed components" or "Platforms, channels, versions"
-sections. Component details should be folded into the overview paragraph.
-Channel information belongs in `sdk info`, not the README.
-
-SECTION GUIDE:
-
-Title and description:
-Use the format "[Software Name] SDK for Workshop". Answer: What is it?
-What does it do? Who is it for? Keep it 2-3 compound sentences long.
-Focus on how the SDK affects the user's environment, not on marketing
-language. Avoid phrases like "focus on writing and testing code".
-
-Reference workshop:
-Provide an inline minimal workshop.yaml.
-Explain briefly what the reference demonstrates.
-
-Using the SDK:
-Step-by-step: prerequisite SDKs, project layout, launch, primary workflow.
-All commands must be tested and working. Keep code examples clear about
-whether they run on the host or inside the workshop.
-
-Plugs and slots:
-Document each plug: interface, target/source, purpose.
-Include mounts and persistence details here, and document any tunnels
-alongside other plug types.
-If the SDK relies on resources exposed by other SDKs, say this explicitly.
-Do the same for slots if SDK exposes resources to others.
-Use "workshop updates" (not "restarts" or "sessions") when describing
-what mounts survive.
-
-Documentation and guidance:
-Link to upstream docs.
-
-Community and support:
-Link to forums, support channels, Code of Conduct.
-
-Contributions:
-Link to contribution guides, CONTRIBUTING.md.
-
-License and copyright:
-Include copyright holder, year, license name and link.
-Make sure to include all shipped components.
--->
-
-# [Software Name] SDK for Workshop
-
-[Brief description of what this SDK provides. Should closely match the
-sdkcraft.yaml description. Focus on how the SDK affects the development
-environment: what toolchain/runtime it provides, what it persists on the host,
-and any notable features. Example: "A development environment for Go projects.
-It provides the official Go toolchain, manages module caches via persistent
-mounts, and preserves Go environment settings across workshop updates."]
+This SDK provides OpenCode for AI-assisted coding within a workshop.
+The OpenCode binary is sandboxed in the workshop container. Configuration
+and application data are persisted between workshop updates.
 
 ---
 
@@ -101,19 +12,17 @@ A minimal workshop:
 
 ```yaml
 # workshop.yaml
-name: [workshop-name]
-base: ubuntu@[version]  # e.g., ubuntu@24.04
+name: opencode
+base: ubuntu@24.04
 sdks:
-  - name: [sdk-name]
-    channel: [channel]  # e.g., 1.24/stable
+  - name: opencode
+    channel: 1.3/stable
 
 actions:
-  [action-name]: |
-    [command]
+  opencode: opencode "$@"
 ```
 
-[One sentence explaining what this demonstrates, e.g., "This demonstrates a
-basic Go build workflow with persistent module caching."]
+This creates a basic OpenCode environment with an interactive action.
 
 ---
 
@@ -121,66 +30,59 @@ basic Go build workflow with persistent module caching."]
 
 ### Prerequisites, project layout
 
-1. [List prerequisites, e.g., "This relies on the `uv` SDK for venv."]
-2. [Suggest expected project directory structure, including source code layout
-   and setup steps needed:]
+1. No prerequisite SDKs are required.
+2. Place your project files in your project directory. No special layout is
+   required; OpenCode works with any codebase.
+3. On launch, the SDK configures `PATH` for the `opencode` binary. If VS Code
+   is available, the SDK also installs the OpenCode VS Code extension.
 
-   ```bash
-   [command to clone or prepare sources]
-   ```
-
-3. [Describe what side effects may happen during launch and refresh.]
-
-### [Primary workflow task, e.g., "Build the project"]
+### Start a coding session
 
 Once the workshop is ready:
 
 ```bash
-[workshop run]
-[commands to perform the primary task]
-```
-
-[Explain where outputs go and how they persist across workshop updates.]
-
-### [Secondary workflow task, e.g., "Test and run"]
-
-From within the workshop shell:
-
-```bash
 workshop shell
-[test or run commands]
+opencode
 ```
 
-[Brief explanation of what this achieves.]
+This opens an interactive OpenCode session inside the workshop.
+
+### Authenticate with OpenCode
+
+OpenCode stores its configuration in `~/.config/opencode` and session data
+in `~/.local/share/opencode`. Both directories are persisted between
+workshop updates via mount plugs.
+
+To configure API credentials, set the appropriate environment variable
+inside the workshop. You can pass it using the `--env` option with
+`workshop run` or `workshop exec`.
 
 ---
 
 ## Plugs (resources this SDK consumes)
 
-### `[plug-name]`
+### `opencode-data`
 
 - Interface: `mount`
-- Workshop target: `[/path/inside/workshop]`
-- Purpose: [What this persists between workshop updates.]
+- Workshop target: `/home/workshop/.local/share/opencode`
+- Purpose: Persists OpenCode's session data and history between workshop updates.
 
-### `[plug-name]`
+### `opencode-config`
 
-- Interface: `gpu`
-- Purpose: Grants access to [AMD/NVIDIA] GPU hardware on the host.
+- Interface: `mount`
+- Workshop target: `/home/workshop/.config/opencode`
+- Purpose: Preserves OpenCode's configuration and credentials between workshop updates.
+  You can also use `workshop remount` to control its contents on the host.
+  To mount your existing `~/.config/opencode` settings into the workshop, stop
+  the workshop first, remount, then start it again:
 
--- OR --
-
-This SDK doesn't define any plugs.
+  ```bash
+  workshop stop <workshop-name>
+  workshop remount <workshop-name>/opencode:opencode-config ~/.config/opencode
+  workshop start <workshop-name>
+  ```
 
 ## Slots (resources this SDK provides)
-
-### `[slot-name]`
-
-- Interface: `mount`
-- Workshop source: `[/path/inside/workshop]`
-- Purpose: [What resource this exposes to other SDKs]
-
--- OR --
 
 This SDK doesn't define any slots.
 
@@ -188,16 +90,19 @@ This SDK doesn't define any slots.
 
 ## Documentation and guidance
 
-- [[XYZ] official documentation]([upstream-docs-url])
-- [[XYZ] best practices]([public-website-url])
+- [OpenCode repository](https://github.com/anomalyco/opencode)
+- [Workshop documentation](https://canonical-workshop.readthedocs-hosted.com/latest/)
 
 ---
 
 ## Community and support
 
-- [XYZ] community forum: [Link to upstream forum/community]
-- Please review our [Code of Conduct](https://ubuntu.com/community/ethos/code-of-conduct)
-  before participating.
+- OpenCode community: [OpenCode GitHub Discussions](https://github.com/anomalyco/opencode/discussions)
+- Workshop forum:
+  [Workshop Discourse](https://discourse.canonical.com/c/engineering/workshops/34)
+- Please review our
+  [Code of Conduct](https://ubuntu.com/community/ethos/code-of-conduct) before
+  participating.
 
 ---
 
@@ -206,13 +111,23 @@ This SDK doesn't define any slots.
 All contributions, including code, documentation updates, and issue reports,
 are welcome!
 
-- See [CONTRIBUTING]([public-github-url]) for guidelines.
-- Open issues or pull requests on the [official repository]([repo-url]).
+- See `CONTRIBUTING.md` for guidelines.
+- Open issues or pull requests on the official repository.
 
 ---
 
 ## License and copyright
 
-Copyright [START YEAR] [COPYRIGHT HOLDER].
+Copyright 2026 Canonical Ltd.
 
-[Include any required claims, information, and disclaimers for your license.]
+This program is free software: you can redistribute it and/or modify it under
+the terms of the
+[GNU Lesser General Public License version 2.1 (LGPLv2.1)](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)
+as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+[OpenCode](https://github.com/anomalyco/opencode) is licensed under
+the [MIT License](https://opensource.org/licenses/MIT).

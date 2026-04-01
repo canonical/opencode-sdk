@@ -1,0 +1,6 @@
+#!/usr/bin/bash
+
+# Install vscode extension
+if command -v code >/dev/null 2>&1; then
+  code --install-extension sst-dev.opencode
+fi

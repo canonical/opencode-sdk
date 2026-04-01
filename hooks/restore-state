@@ -1,0 +1,13 @@
+WORKSHOP_HOME="/home/workshop"
+SHARE_DIR="${WORKSHOP_HOME}/.local/share/opencode/"
+CONFIG_DIR="${WORKSHOP_HOME}/.config/opencode/"
+
+mkdir -p "${SHARE_DIR}" "${CONFIG_DIR}"
+
+if [ -d "${SDK_STATE_DIR}/opencode-share" ]; then
+  cp -fa "${SDK_STATE_DIR}/opencode-share/"* "${SHARE_DIR}"
+fi
+
+if [ -d "${SDK_STATE_DIR}/opencode-config" ]; then
+  cp -fa "${SDK_STATE_DIR}/opencode-config/"* "${CONFIG_DIR}"
+fi

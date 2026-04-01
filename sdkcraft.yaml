@@ -1,0 +1,35 @@
+name: opencode
+adopt-info: opencode
+title: The OpenCode SDK
+build-base: ubuntu@24.04
+summary: The OpenCode SDK.
+description: |
+  This SDK provides OpenCode for AI-assisted coding within a workshop.
+  The OpenCode binary is sandboxed in the workshop container. Configuration
+  and application data are persisted between workshop updates.
+license: MIT
+platforms:
+  amd64:
+
+plugs:
+  opencode-data:
+    interface: mount
+    workshop-target: /home/workshop/.local/share/opencode
+
+  opencode-config:
+    interface: mount
+    workshop-target: /home/workshop/.config/opencode
+
+parts:
+  opencode:
+    plugin: dump
+    source: .
+    source-type: local
+    override-pull: |
+      VERSION=$(cat "$CRAFT_PROJECT_DIR/VERSION")
+      craftctl set version="$VERSION"
+      curl -fLO "https://github.com/anomalyco/opencode/releases/download/v${VERSION}/opencode-linux-x64.tar.gz"
+      tar -xzf "opencode-linux-x64.tar.gz" -C "$CRAFT_PART_SRC"
+      rm "opencode-linux-x64.tar.gz"
+    organize:
+      opencode: usr/bin/opencode
