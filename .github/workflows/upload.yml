@@ -20,5 +20,6 @@ jobs:
     uses: canonical/sdkcraft-actions/.github/workflows/upload.yml@main
     with:
       platforms: '["amd64"]'
+      risk: "stable"
     secrets:
       SDKCRAFT_STORE_CREDENTIALS: ${{ secrets.SDKCRAFT_STORE_CREDENTIALS_STAGING }}
