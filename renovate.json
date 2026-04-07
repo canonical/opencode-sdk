@@ -20,13 +20,12 @@
     }
   ],
   "baseBranchPatterns": [
-    "1.3"
+    "latest"
   ],
   "packageRules": [
     {
       "matchPackageNames": ["anomalyco/opencode"],
-      "matchBaseBranches": ["1.3"],
-      "allowedVersions": "/^1\\.3\\./"
+      "matchBaseBranches": ["latest"]
     }
   ]
 }
