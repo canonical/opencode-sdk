@@ -1,6 +1,0 @@
-WORKSHOP_HOME="/home/workshop"
-SHARE_DIR="${WORKSHOP_HOME}/.local/share/opencode/"
-CONFIG_DIR="${WORKSHOP_HOME}/.config/opencode/"
-
-cp -a "${SHARE_DIR}" "$SDK_STATE_DIR"/opencode-share
-cp -a "${CONFIG_DIR}" "$SDK_STATE_DIR"/opencode-config
