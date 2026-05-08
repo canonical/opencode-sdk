@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 # check opencode is installed and available
-if [[ ! -f "${SDK}/usr/bin/opencode" ]]; then
+if [[ ! -f "${SDK}/bin/opencode" ]]; then
   workshopctl set-health --code="opencode-not-installed" error "OpenCode not installed."
   exit 0
 fi

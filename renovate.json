@@ -15,7 +15,7 @@
       ],
       "depNameTemplate": "anomalyco/opencode",
       "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v(?<version>.*)$",
+      "extractVersionTemplate": "^v?(?<version>.+)$",
       "versioningTemplate": "semver"
     }
   ],

@@ -1,5 +1,5 @@
 #!/usr/bin/bash
 
 cat <<EOF >/etc/profile.d/opencode.sh
-export PATH="${SDK}/usr/bin:\$PATH"
+export PATH="${SDK}/bin:\$PATH"
 EOF
