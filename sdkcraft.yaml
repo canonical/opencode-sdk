@@ -62,3 +62,8 @@ parts:
       chmod 755 "$CRAFT_PART_SRC/opencode"
     override-build: |
       install -Dm755 "$CRAFT_PART_SRC/opencode" "$CRAFT_PRIME/bin/opencode"
+
+  workshop-prompt:
+    plugin: dump
+    source: workshop-prompt.md
+    source-type: file
