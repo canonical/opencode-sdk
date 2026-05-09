@@ -16,7 +16,7 @@ name: opencode
 base: ubuntu@24.04
 sdks:
   - name: opencode
-    channel: 1.3/stable
+    channel: latest/stable
 
 actions:
   opencode: opencode "$@"
