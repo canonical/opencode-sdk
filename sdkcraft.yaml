@@ -27,30 +27,21 @@ parts:
     build-packages:
       - curl
       - ca-certificates
-      - jq
     override-pull: |
       VERSION="$(cat "$CRAFT_PROJECT_DIR/VERSION")"
       craftctl set version="$VERSION"
-      RELEASE_API="https://api.github.com/repos/anomalyco/opencode/releases/tags/v${VERSION}"
 
       case "${CRAFT_ARCH_BUILD_FOR}" in
-        amd64) ARCH=x64  ;;
+        amd64) ARCH=x64    ;;
         arm64) ARCH=arm64  ;;
-        *)            echo "Unsupported arch: ${CRAFT_ARCH_BUILD_FOR}" >&2; exit 1 ;;
+        *) echo "Unsupported arch: ${CRAFT_ARCH_BUILD_FOR}" >&2; exit 1 ;;
       esac
       ASSET="opencode-linux-${ARCH}.tar.gz"
       DOWNLOAD_URL="https://github.com/anomalyco/opencode/releases/download/v${VERSION}/${ASSET}"
 
-      echo "Fetching release manifest for v${VERSION}..."
-      MANIFEST="$(mktemp)"
-      trap 'rm -f "$MANIFEST"' EXIT
-      curl -fsSL "$RELEASE_API" -o "$MANIFEST"
-
-      CHECKSUM="$(jq -r --arg name "$ASSET" \
-        '.assets[] | select(.name==$name) | .digest | sub("^sha256:"; "")' "$MANIFEST")"
-
+      CHECKSUM="$(awk -v key="$ASSET" '$2 == key {print $1}' "$CRAFT_PROJECT_DIR/CHECKSUMS")"
       if ! echo "$CHECKSUM" | grep -qE '^[a-f0-9]{64}$'; then
-        echo "Invalid or missing checksum for ${ASSET}" >&2
+        echo "Invalid or missing checksum for ${ASSET} in CHECKSUMS" >&2
         exit 1
       fi
 

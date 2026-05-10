@@ -1,0 +1,43 @@
+name: Update CHECKSUMS on VERSION bump
+
+# Runs on Renovate-authored PRs that touch VERSION. Recomputes the per-arch
+# SHA256 sums of the release tarballs and commits the refreshed CHECKSUMS
+# file to the same PR branch.
+#
+# Note: pushes performed with GITHUB_TOKEN do not retrigger downstream
+# workflows. After this workflow commits, push an empty commit (or close +
+# reopen the PR) to re-run the build CI.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - VERSION
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: startsWith(github.head_ref, 'renovate/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Recompute CHECKSUMS
+        run: ./scripts/update-checksums.sh
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet CHECKSUMS; then
+            echo "CHECKSUMS already up to date."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHECKSUMS
+          git commit -m "Update CHECKSUMS for VERSION bump"
+          git push
