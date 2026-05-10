@@ -1,5 +1,3 @@
-#!/usr/bin/bash
-
 # check opencode is installed and available
 if [[ ! -f "${SDK}/bin/opencode" ]]; then
   workshopctl set-health --code="opencode-not-installed" error "OpenCode not installed."
@@ -9,12 +7,6 @@ fi
 if ! sudo -u workshop --login which opencode >/dev/null 2>&1; then
   workshopctl set-health --code="opencode-not-on-path" error "OpenCode not on \$PATH."
   exit 0
-fi
-
-if ! command -v code >/dev/null 2>&1; then
-  echo -n "VS Code -> Extensions -> opencode by Anomaly
-or from the terminal,
-code --install-extension sst-dev.opencode"
 fi
 
 workshopctl set-health okay
