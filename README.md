@@ -16,7 +16,7 @@ name: opencode
 base: ubuntu@24.04
 sdks:
   - name: opencode
-    channel: 1.3/stable
+    channel: latest/stable
 
 actions:
   opencode: opencode "$@"
@@ -50,8 +50,10 @@ This opens an interactive OpenCode session inside the workshop.
 ### Authenticate with OpenCode
 
 OpenCode stores its configuration in `~/.config/opencode` and session data
-in `~/.local/share/opencode`. Both directories are persisted between
-workshop updates via mount plugs.
+in `~/.local/share/opencode`. Both directories are persisted across
+`workshop refresh`, `workshop stop`/`start`, and `workshop restore`
+via the `opencode-config` and `opencode-data` mount plugs declared below;
+no `save-state`/`restore-state` hooks are required or used.
 
 To configure API credentials, set the appropriate environment variable
 inside the workshop. You can pass it using the `--env` option with

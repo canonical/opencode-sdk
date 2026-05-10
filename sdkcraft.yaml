@@ -10,6 +10,7 @@ description: |
 license: MIT
 platforms:
   amd64:
+  arm64:
 
 plugs:
   opencode-data:
@@ -22,14 +23,56 @@ plugs:
 
 parts:
   opencode:
-    plugin: dump
-    source: .
-    source-type: local
+    plugin: nil
+    build-packages:
+      - curl
+      - ca-certificates
+      - jq
     override-pull: |
-      VERSION=$(cat "$CRAFT_PROJECT_DIR/VERSION")
+      VERSION="$(cat "$CRAFT_PROJECT_DIR/VERSION")"
       craftctl set version="$VERSION"
-      curl -fLO "https://github.com/anomalyco/opencode/releases/download/v${VERSION}/opencode-linux-x64.tar.gz"
-      tar -xzf "opencode-linux-x64.tar.gz" -C "$CRAFT_PART_SRC"
-      rm "opencode-linux-x64.tar.gz"
-    organize:
-      opencode: usr/bin/opencode
+      RELEASE_API="https://api.github.com/repos/anomalyco/opencode/releases/tags/v${VERSION}"
+
+      case "${CRAFT_ARCH_BUILD_FOR}" in
+        amd64) ARCH=x64  ;;
+        arm64) ARCH=arm64  ;;
+        *)            echo "Unsupported arch: ${CRAFT_ARCH_BUILD_FOR}" >&2; exit 1 ;;
+      esac
+      ASSET="opencode-linux-${ARCH}.tar.gz"
+      DOWNLOAD_URL="https://github.com/anomalyco/opencode/releases/download/v${VERSION}/${ASSET}"
+
+      echo "Fetching release manifest for v${VERSION}..."
+      MANIFEST="$(mktemp)"
+      trap 'rm -f "$MANIFEST"' EXIT
+      curl -fsSL "$RELEASE_API" -o "$MANIFEST"
+
+      CHECKSUM="$(jq -r --arg name "$ASSET" \
+        '.assets[] | select(.name==$name) | .digest | sub("^sha256:"; "")' "$MANIFEST")"
+
+      if ! echo "$CHECKSUM" | grep -qE '^[a-f0-9]{64}$'; then
+        echo "Invalid or missing checksum for ${ASSET}" >&2
+        exit 1
+      fi
+
+      echo "Downloading ${DOWNLOAD_URL}..."
+      curl -fsSL -o "$CRAFT_PART_SRC/${ASSET}" "$DOWNLOAD_URL"
+
+      ACTUAL="$(sha256sum "$CRAFT_PART_SRC/${ASSET}" | cut -d' ' -f1)"
+      if [ "$ACTUAL" != "$CHECKSUM" ]; then
+        echo "Checksum mismatch!" >&2
+        echo "  expected: $CHECKSUM" >&2
+        echo "  actual:   $ACTUAL" >&2
+        rm -f "$CRAFT_PART_SRC/${ASSET}"
+        exit 1
+      fi
+
+      echo "Checksum OK. Extracting..."
+      tar -xzf "$CRAFT_PART_SRC/${ASSET}" -C "$CRAFT_PART_SRC"
+      rm "$CRAFT_PART_SRC/${ASSET}"
+    override-build: |
+      install -Dm755 "$CRAFT_PART_SRC/opencode" "$CRAFT_PART_INSTALL/bin/opencode"
+
+  workshop-prompt:
+    plugin: dump
+    source: workshop-prompt.md
+    source-type: file

@@ -1,6 +1,11 @@
-#!/usr/bin/bash
+mkdir -p "$HOME/.config/opencode"
 
-# Install vscode extension
-if command -v code >/dev/null 2>&1; then
-  code --install-extension sst-dev.opencode
+# Install the SDK's AGENTS.md only on first run. Once it exists — whether
+# unchanged from the SDK or user-customised — refreshes leave it alone.
+# To pull in an updated SDK prompt, delete the file and run `workshop refresh`.
+#
+# OpenCode reads ~/.config/opencode/AGENTS.md natively as global rules
+# (see opencode.ai/docs/rules), so no wrapper is needed.
+if [[ ! -f "$HOME/.config/opencode/AGENTS.md" ]]; then
+    install -m644 "${SDK}/workshop-prompt.md" "$HOME/.config/opencode/AGENTS.md"
 fi

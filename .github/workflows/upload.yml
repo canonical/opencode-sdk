@@ -19,7 +19,7 @@ jobs:
   build-and-upload:
     uses: canonical/sdkcraft-actions/.github/workflows/upload.yml@main
     with:
-      platforms: '["amd64"]'
+      platforms: '["amd64", "arm64"]'
       track: "latest"
       risk: "stable"
     secrets:
