@@ -16,10 +16,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-upload:
+  build-and-upload-amd64:
     uses: canonical/sdkcraft-actions/.github/workflows/upload.yml@main
     with:
-      platforms: '["amd64", "arm64"]'
+      platforms: '["amd64"]'
+      platform-flag: "--build-for"
+      track: "latest"
+      risk: "stable"
+    secrets:
+      SDKCRAFT_STORE_CREDENTIALS: ${{ secrets.SDKCRAFT_STORE_CREDENTIALS_PROD }}
+  build-and-upload-arm64:
+    uses: canonical/sdkcraft-actions/.github/workflows/upload.yml@main
+    with:
+      platforms: '["arm64"]'
+      platform-flag: "--build-for"
+      runs-on: '["self-hosted-linux-arm64-noble-xlarge"]'
       track: "latest"
       risk: "stable"
     secrets:
