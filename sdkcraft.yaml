@@ -1,7 +1,7 @@
 name: opencode
 adopt-info: opencode
 title: The OpenCode SDK
-build-base: ubuntu@24.04
+build-base: ubuntu@26.04
 summary: The OpenCode SDK.
 description: |
   This SDK provides OpenCode for AI-assisted coding within a workshop.
