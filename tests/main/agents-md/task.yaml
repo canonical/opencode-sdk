@@ -1,0 +1,19 @@
+summary: setup-project hook installs the workshop prompt as ~/.config/opencode/AGENTS.md
+
+prepare: |
+  envsubst '${BASE}' <workshop.yaml.in >workshop.yaml
+  workshop launch
+
+restore: |
+  workshop remove || true
+
+execute: |
+  # setup-project installs the workshop prompt as ~/.config/opencode/AGENTS.md,
+  # which OpenCode reads natively as global rules on every invocation.
+  workshop exec -- test -f /home/workshop/.config/opencode/AGENTS.md
+  workshop exec -- head -1 /home/workshop/.config/opencode/AGENTS.md | \
+    MATCH "Workshop Container Environment Instructions"
+
+debug: |
+  workshop exec -- ls -la /home/workshop/.config/opencode/ || true
+  workshop exec -- cat /home/workshop/.config/opencode/AGENTS.md || true

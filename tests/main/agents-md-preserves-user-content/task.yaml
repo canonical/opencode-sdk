@@ -1,0 +1,33 @@
+summary: setup-project preserves an existing AGENTS.md across re-runs
+
+prepare: |
+  envsubst '${BASE}' <workshop.yaml.in >workshop.yaml
+  workshop launch
+
+restore: |
+  workshop remove || true
+
+execute: |
+  # The `agents-md` task covers the fresh-write branch of setup-project.
+  # Here we cover the other branch against a real workshop:
+  #   AGENTS.md already exists → setup-project must leave it byte-for-byte
+  #   alone (whether it's user content or the SDK's own prompt).
+  #
+  # `workshop restore` is the lifecycle command that re-runs setup hooks
+  # (verified empirically: `refresh` is a no-op when the SDK is unchanged,
+  # and stop+start does not re-trigger provisioning).
+
+  # Overwrite the AGENTS.md with unrelated user content, then re-run hooks.
+  workshop exec -- bash -c 'echo "MY USER NOTES" > /home/workshop/.config/opencode/AGENTS.md'
+  workshop restore
+  workshop exec -- cat /home/workshop/.config/opencode/AGENTS.md | MATCH "^MY USER NOTES$"
+
+  # Re-run hooks again, AGENTS.md must be byte-identical.
+  BEFORE=$(workshop exec -- sha256sum /home/workshop/.config/opencode/AGENTS.md | awk '{print $1}')
+  workshop restore
+  AFTER=$(workshop exec -- sha256sum /home/workshop/.config/opencode/AGENTS.md | awk '{print $1}')
+  test "$BEFORE" = "$AFTER"
+
+debug: |
+  workshop exec -- ls -la /home/workshop/.config/opencode/ || true
+  workshop exec -- cat /home/workshop/.config/opencode/AGENTS.md || true
