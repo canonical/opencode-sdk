@@ -1,0 +1,18 @@
+summary: Launch a workshop with the opencode SDK
+
+prepare: |
+  envsubst '${BASE}' <workshop.yaml.in >workshop.yaml
+  workshop launch
+
+restore: |
+  workshop remove || true
+
+execute: |
+  # `workshop launch` is a blocking, fail-fast call: if it returned 0 in
+  # prepare, the workshop is fully provisioned with our SDK applied
+  # (including check-health reporting okay). As a belt-and-braces sanity
+  # check, prove the workshop is interactable.
+  workshop exec -- true
+
+debug: |
+  workshop tasks

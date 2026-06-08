@@ -1,0 +1,16 @@
+summary: opencode --version runs and reports the expected version
+
+prepare: |
+  envsubst '${BASE}' <workshop.yaml.in >workshop.yaml
+  workshop launch
+
+restore: |
+  workshop remove || true
+
+execute: |
+  # Escape dots so MATCH treats the version literally, not as a regex.
+  EXPECTED_REGEX="${EXPECTED_VERSION//./\\.}"
+  workshop exec -- opencode --version | MATCH "$EXPECTED_REGEX"
+
+debug: |
+  workshop exec -- opencode --version || true
