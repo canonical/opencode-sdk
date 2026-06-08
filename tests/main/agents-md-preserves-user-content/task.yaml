@@ -18,7 +18,9 @@ execute: |
   # and stop+start does not re-trigger provisioning).
 
   # Overwrite the AGENTS.md with unrelated user content, then re-run hooks.
-  workshop exec -- bash -c 'echo "MY USER NOTES" > /home/workshop/.config/opencode/AGENTS.md'
+  workshop exec -- tee /home/workshop/.config/opencode/AGENTS.md >/dev/null <<'AGENTS'
+  MY USER NOTES
+  AGENTS
   workshop restore
   workshop exec -- cat /home/workshop/.config/opencode/AGENTS.md | MATCH "^MY USER NOTES$"
 
