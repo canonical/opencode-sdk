@@ -8,6 +8,7 @@ description: |
   The OpenCode binary is sandboxed in the workshop container. Configuration
   and application data are persisted between workshop updates.
 license: MIT
+website: https://github.com/canonical/opencode-sdk
 platforms:
   amd64:
     build-on: [amd64, arm64]
