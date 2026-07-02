@@ -84,6 +84,19 @@ inside the workshop. You can pass it using the `--env` option with
   workshop start <workshop-name>
   ```
 
+### `desktop`
+
+- Interface: `desktop`
+- Purpose: Grants the workshop opt-in access to the host desktop session,
+  including the clipboard. Together with the bundled `wl-clipboard` and
+  `xclip` utilities, this lets OpenCode's clipboard features reach the host.
+- This plug is **not** connected automatically. Connect it explicitly when you
+  want clipboard access:
+
+  ```bash
+  workshop connect <workshop-name>/opencode:desktop
+  ```
+
 ## Slots (resources this SDK provides)
 
 This SDK doesn't define any slots.
