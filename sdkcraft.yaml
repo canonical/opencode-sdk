@@ -26,6 +26,9 @@ plugs:
     interface: mount
     workshop-target: /home/workshop/.config/opencode
 
+  # Opt-in access to the host desktop session, including the clipboard.
+  desktop:
+
 parts:
   opencode:
     plugin: nil
