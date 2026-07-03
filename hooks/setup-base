@@ -1,3 +1,7 @@
 cat <<EOF >/etc/profile.d/opencode.sh
 export PATH="${SDK}/bin:\$PATH"
 EOF
+
+# wl-clipboard and xclip are required for clipboard support in some terminals.
+apt-get update
+apt-get install wl-clipboard xclip
