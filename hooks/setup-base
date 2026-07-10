@@ -5,3 +5,19 @@ EOF
 # wl-clipboard and xclip are required for clipboard support in some terminals.
 apt-get update
 apt-get install wl-clipboard xclip
+
+# Install the SDK's instruction
+install -D -m644 "${SDK}/workshop-prompt.md" "/etc/opencode/instructions/workshop-prompt.md"
+
+apt-get install -y jq
+
+# Use the system managed config directory
+_config="/etc/opencode/opencode.json"
+if [ ! -f "${_config}" ]; then
+	# No existing config: install the SDK's opencode.json as-is.
+	install -m644 "${SDK}/opencode.json" "${_config}"
+else
+	# Merge the SDK's opencode.json fragments into the existing config.
+	_merged=$(jq -s '.[0] * .[1]' "${_config}" "${SDK}/opencode.json")
+	echo "${_merged}" > "${_config}"
+fi
