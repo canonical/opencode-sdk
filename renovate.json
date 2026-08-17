@@ -3,6 +3,8 @@
   "extends": [
     "config:recommended"
   ],
+  "dependencyDashboard": true,
+  "platformAutomerge": true,
   "enabledManagers": [
     "custom.regex"
   ],
@@ -25,7 +27,9 @@
   "packageRules": [
     {
       "matchPackageNames": ["anomalyco/opencode"],
-      "matchBaseBranches": ["latest"]
+      "matchBaseBranches": ["latest"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
     }
   ]
 }
