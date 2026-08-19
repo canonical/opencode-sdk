@@ -13,11 +13,7 @@ execute: |
   # gets the SDK's keys merged in, but user-only keys are preserved.
 
   # Add a user key that is not in the SDK's opencode.json.
-  workshop exec -- sh -c '
-    tmp=$(mktemp)
-    jq '\''.[0] * {"model": "my-custom-model"}'\'' /etc/opencode/opencode.json > "$tmp"
-    mv "$tmp" /etc/opencode/opencode.json
-  '
+  workshop exec -- sh -c 'tmp=$(mktemp) && jq ". * {\"model\": \"my-custom-model\"}" /etc/opencode/opencode.json > "$tmp" && mv "$tmp" /etc/opencode/opencode.json'
 
   workshop restore
 
