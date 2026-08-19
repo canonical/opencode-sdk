@@ -1,4 +1,4 @@
-summary: setup-project preserves an existing AGENTS.md across re-runs
+summary: setup-base merges opencode.json preserving existing user config on re-runs
 
 prepare: |
   envsubst '${BASE}' <workshop.yaml.in >workshop.yaml
@@ -8,28 +8,24 @@ restore: |
   workshop remove || true
 
 execute: |
-  # The `agents-md` task covers the fresh-write branch of setup-project.
-  # Here we cover the other branch against a real workshop:
-  #   AGENTS.md already exists → setup-project must leave it byte-for-byte
-  #   alone (whether it's user content or the SDK's own prompt).
-  #
-  # `workshop restore` is the lifecycle command that re-runs setup hooks
-  # (verified empirically: `refresh` is a no-op when the SDK is unchanged,
-  # and stop+start does not re-trigger provisioning).
+  # The `agents-md` task covers the fresh-install branch of setup-base.
+  # Here we cover the merge branch: an existing /etc/opencode/opencode.json
+  # gets the SDK's keys merged in, but user-only keys are preserved.
 
-  # Overwrite the AGENTS.md with unrelated user content, then re-run hooks.
-  workshop exec -- tee /home/workshop/.config/opencode/AGENTS.md >/dev/null <<'AGENTS'
-  MY USER NOTES
-  AGENTS
-  workshop restore
-  workshop exec -- cat /home/workshop/.config/opencode/AGENTS.md | MATCH "^MY USER NOTES$"
+  # Add a user key that is not in the SDK's opencode.json.
+  workshop exec -- sh -c '
+    tmp=$(mktemp)
+    jq '\''.[0] * {"model": "my-custom-model"}'\'' /etc/opencode/opencode.json > "$tmp"
+    mv "$tmp" /etc/opencode/opencode.json
+  '
 
-  # Re-run hooks again, AGENTS.md must be byte-identical.
-  BEFORE=$(workshop exec -- sha256sum /home/workshop/.config/opencode/AGENTS.md | awk '{print $1}')
   workshop restore
-  AFTER=$(workshop exec -- sha256sum /home/workshop/.config/opencode/AGENTS.md | awk '{print $1}')
-  test "$BEFORE" = "$AFTER"
+
+  # User key must still be present after the merge.
+  workshop exec -- cat /etc/opencode/opencode.json | MATCH '"my-custom-model"'
+
+  # SDK key must also be present.
+  workshop exec -- cat /etc/opencode/opencode.json | MATCH '/etc/opencode/instructions/'
 
 debug: |
-  workshop exec -- ls -la /home/workshop/.config/opencode/ || true
-  workshop exec -- cat /home/workshop/.config/opencode/AGENTS.md || true
+  workshop exec -- cat /etc/opencode/opencode.json || true
