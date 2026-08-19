@@ -84,3 +84,8 @@ parts:
     plugin: dump
     source: workshop-prompt.md
     source-type: file
+
+  workshop-config:
+    plugin: dump
+    source: opencode.json
+    source-type: file
