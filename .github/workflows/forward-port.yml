@@ -1,0 +1,17 @@
+name: Forward-Port from Main
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  forward-port:
+    uses: canonical/sdkcraft-actions/.github/workflows/forward-port.yml@main
+    with:
+      long-term-branches: ${{ vars.LONG_TERM_BRANCHES }}
