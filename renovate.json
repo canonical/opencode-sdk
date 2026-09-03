@@ -19,6 +19,8 @@
       "versioningTemplate": "semver"
     }
   ],
+  "automerge": true,
+  "platformAutomerge": true,
   "baseBranchPatterns": [
     "latest"
   ],

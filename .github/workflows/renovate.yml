@@ -1,8 +1,7 @@
 name: Renovate
 
 on:
-  schedule:
-    - cron: "0 4 * * 1-5"
+  # Scheduled runs are handled by the Renovate GitHub App; this one is manual-only.
   workflow_dispatch:
 
 permissions:
