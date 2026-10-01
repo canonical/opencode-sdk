@@ -21,3 +21,18 @@ else
 	_merged=$(jq -s '.[0] * .[1]' "${_config}" "${SDK}/opencode.json")
 	echo "${_merged}" > "${_config}"
 fi
+
+# OpenCode 2.x no longer reads the system-managed /etc/opencode directory, so
+# point it at the same config explicitly. This file is read by the OpenCode
+# background server, which inherits the environment of the shell that starts it.
+#
+# NOTE: as of 2.0.21 OpenCode 2.x parses the "instructions" key but never loads
+# the files it lists, so the workshop prompt is not applied on 2.x until the
+# upstream fix lands (https://github.com/anomalyco/opencode/issues/51341, fix
+# in https://github.com/anomalyco/opencode/pull/51422). No SDK change is needed
+# once a fixed release is picked up by Renovate.
+if [[ "$(cut -d. -f1 "${SDK}/version")" == "2" ]]; then
+	cat <<EOF2 >>/etc/profile.d/opencode.sh
+export OPENCODE_CONFIG="${_config}"
+EOF2
+fi

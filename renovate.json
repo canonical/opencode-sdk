@@ -11,23 +11,40 @@
       "customType": "regex",
       "managerFilePatterns": ["/^VERSION$/"],
       "matchStrings": [
-        "(?<currentValue>[0-9.]+)"
+        "(?<currentValue>1\\.[0-9.]+)"
       ],
       "depNameTemplate": "anomalyco/opencode",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v?(?<version>.+)$",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^VERSION$/"],
+      "matchStrings": [
+        "(?<currentValue>2\\.[0-9.]+)"
+      ],
+      "depNameTemplate": "@opencode/cli",
+      "datasourceTemplate": "npm",
       "versioningTemplate": "semver"
     }
   ],
   "automerge": true,
   "platformAutomerge": true,
   "baseBranchPatterns": [
-    "latest"
+    "1",
+    "2"
   ],
   "packageRules": [
     {
       "matchPackageNames": ["anomalyco/opencode"],
-      "matchBaseBranches": ["latest"]
+      "matchBaseBranches": ["1"],
+      "allowedVersions": "/^1\\./"
+    },
+    {
+      "matchPackageNames": ["@opencode/cli"],
+      "matchBaseBranches": ["2"],
+      "allowedVersions": "/^2\\./"
     }
   ]
 }
