@@ -36,49 +36,55 @@ parts:
       - curl
       - ca-certificates
       - jq
+      - openssl
     override-pull: |
       VERSION="$(cat "$CRAFT_PROJECT_DIR/VERSION")"
       craftctl set version="$VERSION"
-      RELEASE_API="https://api.github.com/repos/anomalyco/opencode/releases/tags/v${VERSION}"
+      MAJOR="${VERSION%%.*}"
 
       case "${CRAFT_ARCH_BUILD_FOR}" in
         amd64) ARCH=x64  ;;
         arm64) ARCH=arm64  ;;
         *)            echo "Unsupported arch: ${CRAFT_ARCH_BUILD_FOR}" >&2; exit 1 ;;
       esac
-      ASSET="opencode-linux-${ARCH}.tar.gz"
-      DOWNLOAD_URL="https://github.com/anomalyco/opencode/releases/download/v${VERSION}/${ASSET}"
 
-      echo "Fetching release manifest for v${VERSION}..."
-      MANIFEST="$(mktemp)"
-      trap 'rm -f "$MANIFEST"' EXIT
-      curl -fsSL "$RELEASE_API" -o "$MANIFEST"
-
-      CHECKSUM="$(jq -r --arg name "$ASSET" \
-        '.assets[] | select(.name==$name) | .digest | sub("^sha256:"; "")' "$MANIFEST")"
-
-      if ! echo "$CHECKSUM" | grep -qE '^[a-f0-9]{64}$'; then
-        echo "Invalid or missing checksum for ${ASSET}" >&2
+      # Each major is verified in the hash format its source publishes, so no
+      # base64<->hex conversion is needed.
+      if [ "$MAJOR" = "1" ]; then
+        # 1.x: GitHub release asset, sha256 digest (hex).
+        ASSET="opencode-linux-${ARCH}.tar.gz"
+        URL="https://github.com/anomalyco/opencode/releases/download/v${VERSION}/${ASSET}"
+        SHA256="$(curl -fsSL "https://api.github.com/repos/anomalyco/opencode/releases/tags/v${VERSION}" \
+          | jq -r --arg a "$ASSET" '.assets[] | select(.name==$a) | .digest | sub("^sha256:"; "")')"
+        curl -fsSL -o "$CRAFT_PART_SRC/${ASSET}" "$URL"
+        echo "${SHA256}  ${CRAFT_PART_SRC}/${ASSET}" | sha256sum -c --status - || {
+          echo "sha256 mismatch for ${ASSET} (expected ${SHA256:-<none>})" >&2; exit 1; }
+      elif [ "$MAJOR" = "2" ]; then
+        # 2.x: per-platform npm package, sha512 SRI integrity (base64).
+        META="$(curl -fsSL "https://registry.npmjs.org/@opencode/cli-linux-${ARCH}/${VERSION}")"
+        ASSET="cli-linux-${ARCH}.tgz"
+        URL="$(jq -r '.dist.tarball' <<<"$META")"
+        SRI="$(jq -r '.dist.integrity' <<<"$META")"
+        curl -fsSL -o "$CRAFT_PART_SRC/${ASSET}" "$URL"
+        ACTUAL="sha512-$(openssl dgst -sha512 -binary "$CRAFT_PART_SRC/${ASSET}" | base64 -w0)"
+        [ "$ACTUAL" = "$SRI" ] || {
+          echo "integrity mismatch for ${ASSET}: expected ${SRI:-<none>}, got ${ACTUAL}" >&2; exit 1; }
+      else
+        echo "Unsupported OpenCode major version: ${VERSION}" >&2
         exit 1
       fi
 
-      echo "Downloading ${DOWNLOAD_URL}..."
-      curl -fsSL -o "$CRAFT_PART_SRC/${ASSET}" "$DOWNLOAD_URL"
-
-      ACTUAL="$(sha256sum "$CRAFT_PART_SRC/${ASSET}" | cut -d' ' -f1)"
-      if [ "$ACTUAL" != "$CHECKSUM" ]; then
-        echo "Checksum mismatch!" >&2
-        echo "  expected: $CHECKSUM" >&2
-        echo "  actual:   $ACTUAL" >&2
-        rm -f "$CRAFT_PART_SRC/${ASSET}"
-        exit 1
-      fi
-
-      echo "Checksum OK. Extracting..."
       tar -xzf "$CRAFT_PART_SRC/${ASSET}" -C "$CRAFT_PART_SRC"
       rm "$CRAFT_PART_SRC/${ASSET}"
+      # npm tarballs nest the binary under package/bin/.
+      if [ -f "$CRAFT_PART_SRC/package/bin/opencode" ]; then
+        mv "$CRAFT_PART_SRC/package/bin/opencode" "$CRAFT_PART_SRC/opencode"
+        rm -rf "$CRAFT_PART_SRC/package"
+      fi
     override-build: |
       install -Dm755 "$CRAFT_PART_SRC/opencode" "$CRAFT_PART_INSTALL/bin/opencode"
+      # Hooks read this to apply major-version specific setup.
+      install -Dm644 "$CRAFT_PROJECT_DIR/VERSION" "$CRAFT_PART_INSTALL/version"
 
   workshop-prompt:
     plugin: dump

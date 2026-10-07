@@ -24,6 +24,19 @@ actions:
 
 This creates a basic OpenCode environment with an interactive action.
 
+### Tracks
+
+| Channel | OpenCode |
+|---|---|
+| `1/stable` | 1.x |
+| `2/stable` | 2.x |
+| `latest/stable` | 1.x (same revisions as `1/stable`) |
+
+On `2/stable`, the SDK's workshop instructions are not yet applied: OpenCode
+2.x ignores the `instructions` config key
+([anomalyco/opencode#51341](https://github.com/anomalyco/opencode/issues/51341)).
+They take effect once a fixed OpenCode release lands on the track.
+
 ---
 
 ## Using the SDK

@@ -17,3 +17,4 @@ suites:
       BASE/noble: ubuntu@24.04
       BASE/resolute: ubuntu@26.04
       EXPECTED_VERSION: '$(HOST: cat "`git rev-parse --show-toplevel`/VERSION")'
+      MAJOR: '$(HOST: cut -d. -f1 "`git rev-parse --show-toplevel`/VERSION")'

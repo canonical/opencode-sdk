@@ -1,0 +1,21 @@
+summary: OpenCode 2.x loads the SDK config from /etc/opencode via OPENCODE_CONFIG
+
+prepare: |
+  # OpenCode 1.x reads /etc/opencode natively; this only applies to 2.x.
+  [ "$MAJOR" = "2" ] || exit 0
+  envsubst '${BASE}' <workshop.yaml.in >workshop.yaml
+  workshop launch
+
+restore: |
+  workshop remove || true
+
+execute: |
+  [ "$MAJOR" = "2" ] || exit 0
+  workshop exec -- printenv OPENCODE_CONFIG | MATCH "^/etc/opencode/opencode.json$"
+  # `debug config` lists every config source the background server loaded.
+  workshop exec -- opencode debug config | MATCH '"path": "/etc/opencode/opencode.json"'
+  workshop exec -- opencode service stop || true
+
+debug: |
+  workshop exec -- cat /etc/profile.d/opencode.sh || true
+  workshop exec -- opencode debug config || true
