@@ -63,8 +63,8 @@ parts:
         # 2.x: per-platform npm package, sha512 SRI integrity (base64).
         META="$(curl -fsSL "https://registry.npmjs.org/@opencode/cli-linux-${ARCH}/${VERSION}")"
         ASSET="cli-linux-${ARCH}.tgz"
-        URL="$(printf '%s' "$META" | jq -r '.dist.tarball')"
-        SRI="$(printf '%s' "$META" | jq -r '.dist.integrity')"
+        URL="$(jq -r '.dist.tarball' <<<"$META")"
+        SRI="$(jq -r '.dist.integrity' <<<"$META")"
         curl -fsSL -o "$CRAFT_PART_SRC/${ASSET}" "$URL"
         ACTUAL="sha512-$(openssl dgst -sha512 -binary "$CRAFT_PART_SRC/${ASSET}" | base64 -w0)"
         [ "$ACTUAL" = "$SRI" ] || {

@@ -21,7 +21,7 @@ jobs:
     with:
       platforms: '["amd64"]'
       platform-flag: "--build-for"
-      ref: ${{ github.event.inputs.branch || github.ref }}
+      ref: ${{ inputs.branch || github.ref }}
       risk: "stable"
       # Track 1 is also released to latest/stable until 2.x becomes the default.
       promote-to-latest: ${{ (github.event.inputs.branch || github.ref_name) == '1' }}
