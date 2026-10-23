@@ -1,0 +1,4 @@
+name: test-opencode
+base: ${BASE}
+sdks:
+  - name: try-opencode
