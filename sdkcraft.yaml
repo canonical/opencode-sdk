@@ -34,7 +34,7 @@ slots:
   # forward the browser redirect into the workshop. The SDK pins the callback
   # to OpenCode's default loopback port. See:
   # https://opencode.ai/docs/mcp-servers/#oauth
-  mcp-oauth-callback:
+  opencode-mcp-oauth-callback:
     interface: tunnel
     endpoint: localhost:19876
 
