@@ -1,0 +1,21 @@
+# /etc/opencode contains SDK-managed config, not a user-custom override.
+# Both OpenCode majors must discover it natively so the workshop prompt loads
+# without OPENCODE_CONFIG changing the documented config precedence.
+summary: OpenCode loads the SDK managed config without OPENCODE_CONFIG
+
+prepare: |
+  envsubst '${BASE}' <workshop.yaml.in >workshop.yaml
+  workshop launch
+
+restore: |
+  workshop remove || true
+
+execute: |
+  ! workshop exec -- printenv OPENCODE_CONFIG
+  # Both versions include the resolved instruction path in debug output.
+  workshop exec -- opencode debug config \
+    | MATCH '/etc/opencode/instructions/workshop-prompt.md'
+
+debug: |
+  workshop exec -- cat /etc/profile.d/opencode.sh || true
+  workshop exec -- opencode debug config || true
