@@ -82,6 +82,13 @@ A server entry that sets `oauth.callback_port` or `oauth.redirect_uri` keeps
 its own setting. Because the port is fixed, only one MCP authentication
 attempt can use it at a time.
 
+### Background server
+
+On launch, the SDK runs OpenCode's shared background server as a user systemd
+service. Clients discover and connect to it automatically. To apply
+configuration changes, restart it with
+`systemctl --user restart opencode.service`.
+
 ---
 
 ## Plugs (resources this SDK consumes)
