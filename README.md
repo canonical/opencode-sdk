@@ -82,6 +82,13 @@ See the
 [OpenCode MCP OAuth documentation](https://opencode.ai/docs/mcp-servers/#oauth)
 for the callback and authentication behaviour.
 
+### Background server
+
+On launch, the SDK runs OpenCode's shared background server as a user systemd
+service. Clients discover and connect to it automatically. To apply
+configuration changes, restart it with
+`systemctl --user restart opencode.service`.
+
 ---
 
 ## Plugs (resources this SDK consumes)
