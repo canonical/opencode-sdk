@@ -1,0 +1,67 @@
+# End-to-end coverage for the opencode-mcp-oauth-callback tunnel slot.
+#
+# A test-only MCP server inside the workshop provides OAuth discovery, dynamic
+# client registration, and a loopback token endpoint. OpenCode starts the auth
+# flow and a fake browser captures the authorization URL. The test host then
+# acts as the browser, and the redirect to 127.0.0.1:19876 is forwarded by the
+# system plug into the workshop callback listener. This proves the slot, the
+# tunnel, and OpenCode's OAuth callback handling work together.
+summary: OpenCode completes MCP OAuth through the workshop callback tunnel
+
+prepare: |
+  rm -rf .workshop/mcp-oauth-fixture
+  mkdir -p .workshop
+  cp -a mcp-oauth-fixture .workshop/
+  envsubst '${BASE}' <workshop.yaml.in >workshop.yaml
+  workshop launch
+
+  workshop exec -- bash -lc \
+    'PATH=/usr/local/bin:$PATH opencode mcp add test \
+      --url http://127.0.0.1:18080/mcp'
+
+restore: |
+  workshop remove || true
+
+execute: |
+  wait_for_auth_url() {
+    for _ in $(seq 1 30); do
+      url=$(workshop exec -- cat /tmp/mcp-auth-url 2>/dev/null || true)
+      if [ -n "$url" ]; then
+        printf '%s\n' "$url"
+        return 0
+      fi
+      sleep 1
+    done
+    return 1
+  }
+
+  workshop connections --all | MATCH opencode-mcp-oauth-callback
+
+  workshop exec -- rm -f /tmp/mcp-auth-url /tmp/mcp-auth.log
+  # OpenCode 1.x opens the browser from its background server.
+  workshop exec -- bash -lc \
+    'PATH=/usr/local/bin:$PATH opencode mcp auth test >/tmp/mcp-auth.log 2>&1' &
+  AUTH_PID=$!
+  trap 'kill "$AUTH_PID" || true' EXIT
+
+  AUTH_URL=$(wait_for_auth_url) || {
+    echo "timed out waiting for the authorization URL" >&2
+    exit 1
+  }
+
+  curl -fsSL "$AUTH_URL" >/tmp/mcp-callback.html
+  MATCH "OpenCode is now connected" </tmp/mcp-callback.html
+
+  wait "$AUTH_PID" || true
+
+  workshop exec -- opencode mcp list >/tmp/mcp-list.txt
+  MATCH test </tmp/mcp-list.txt
+  MATCH connected </tmp/mcp-list.txt
+
+debug: |
+  workshop exec -- journalctl --user -u mcp-oauth-fixture --no-pager || true
+  workshop exec -- cat /tmp/mcp-auth-url || true
+  workshop exec -- cat /tmp/mcp-auth.log || true
+  workshop exec -- cat /tmp/mcp-list.txt || true
+  workshop exec -- opencode mcp list || true
+  workshop connections --all || true

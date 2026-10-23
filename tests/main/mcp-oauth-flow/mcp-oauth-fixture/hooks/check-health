@@ -1,0 +1,9 @@
+#!/bin/bash
+set -eu
+
+if curl -fsS --max-time 2 http://127.0.0.1:18080/health >/dev/null 2>&1; then
+	workshopctl set-health okay
+else
+	workshopctl set-health --code=mcp-oauth-fixture-waiting waiting \
+		"MCP OAuth fixture is starting"
+fi
