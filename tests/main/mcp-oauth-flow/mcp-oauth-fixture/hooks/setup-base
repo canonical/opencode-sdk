@@ -1,0 +1,17 @@
+#!/bin/bash
+set -eu
+
+packages=""
+command -v python3 >/dev/null 2>&1 || packages="$packages python3"
+command -v curl >/dev/null 2>&1 || packages="$packages curl"
+command -v script >/dev/null 2>&1 || packages="$packages util-linux"
+
+if [ -n "$packages" ]; then
+	apt-get update
+	# Word splitting is intentional: $packages is a space-separated list.
+	# shellcheck disable=SC2086
+	apt-get install -y $packages
+fi
+
+# Capture browser-open requests instead of launching a browser in the workshop.
+install -D -m755 "$SDK/xdg-open" /usr/local/bin/xdg-open

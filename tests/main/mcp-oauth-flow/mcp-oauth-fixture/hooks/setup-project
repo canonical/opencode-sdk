@@ -1,0 +1,20 @@
+#!/bin/bash
+set -eu
+
+mkdir -p "$HOME/.config/systemd/user"
+cat >"$HOME/.config/systemd/user/mcp-oauth-fixture.service" <<EOF
+[Unit]
+Description=MCP OAuth test fixture
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/env python3 "$SDK/mcp_oauth_server.py" --port 18080
+Restart=on-failure
+RestartSec=1
+
+[Install]
+WantedBy=default.target
+EOF
+
+systemctl --user daemon-reload
+systemctl --user enable --now mcp-oauth-fixture.service
