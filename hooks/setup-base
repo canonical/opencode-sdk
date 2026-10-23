@@ -21,3 +21,13 @@ else
 	_merged=$(jq -s '.[0] * .[1]' "${_config}" "${SDK}/opencode.json")
 	echo "${_merged}" > "${_config}"
 fi
+
+# OpenCode 2.x picks an ephemeral OAuth callback port by default. Pin it to the
+# SDK's stable port so a workshop tunnel can forward the browser callback.
+install -D -m644 \
+	"${SDK}/mcp-oauth-port.js" \
+	/etc/opencode/plugins/mcp-oauth-port.js
+_merged=$(jq \
+	'.plugins = ((.plugins // []) + ["./plugins/mcp-oauth-port.js"] | unique)' \
+	"${_config}")
+echo "${_merged}" > "${_config}"

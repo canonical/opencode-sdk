@@ -73,6 +73,11 @@ Remote MCP servers that use OAuth redirect the browser to a loopback address
 inside the workshop. The tunnel slot below exposes that listener so a host
 system plug can forward the browser redirect into the workshop.
 
+The SDK pins this callback to `127.0.0.1:19876` so it can be forwarded into
+the workshop. A server entry that sets `oauth.callback_port` or
+`oauth.redirect_uri` keeps its own setting. Because the port is fixed, only
+one MCP authentication attempt can use it at a time.
+
 See the
 [OpenCode MCP OAuth documentation](https://opencode.ai/docs/mcp-servers/#oauth)
 for the callback and authentication behaviour.
