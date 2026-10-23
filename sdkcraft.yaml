@@ -95,3 +95,8 @@ parts:
     plugin: dump
     source: opencode.json
     source-type: file
+
+  mcp-oauth-port:
+    plugin: dump
+    source: mcp-oauth-port.js
+    source-type: file

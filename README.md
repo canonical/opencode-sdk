@@ -72,6 +72,16 @@ To configure API credentials, set the appropriate environment variable
 inside the workshop. You can pass it using the `--env` option with
 `workshop run` or `workshop exec`.
 
+### MCP OAuth callback port
+
+Remote MCP servers that use OAuth redirect the browser to a loopback address
+inside the workshop. The SDK explicitly pins this callback to
+`127.0.0.1:19876` so it can be forwarded into the workshop.
+
+A server entry that sets `oauth.callback_port` or `oauth.redirect_uri` keeps
+its own setting. Because the port is fixed, only one MCP authentication
+attempt can use it at a time.
+
 ---
 
 ## Plugs (resources this SDK consumes)
