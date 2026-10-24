@@ -1,0 +1,18 @@
+summary: The SDK starts OpenCode's shared background server at launch
+
+prepare: |
+  envsubst '${BASE}' <workshop.yaml.in >workshop.yaml
+  workshop launch
+
+restore: |
+  workshop remove || true
+
+execute: |
+  workshop exec -- systemctl --user is-active opencode.service \
+    | MATCH '^active$'
+  workshop exec -- opencode service status | MATCH '^http'
+
+debug: |
+  workshop exec -- systemctl --user status opencode.service || true
+  workshop exec -- journalctl --user -u opencode.service --no-pager || true
+  workshop exec -- opencode service status || true
