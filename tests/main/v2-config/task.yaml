@@ -1,4 +1,4 @@
-summary: OpenCode 2.x loads the SDK config from /etc/opencode via OPENCODE_CONFIG
+summary: OpenCode 2.x loads the SDK config and MCP OAuth port plugin
 
 prepare: |
   # OpenCode 1.x reads /etc/opencode natively; this only applies to 2.x.
@@ -13,7 +13,13 @@ execute: |
   [ "$MAJOR" = "2" ] || exit 0
   workshop exec -- printenv OPENCODE_CONFIG | MATCH "^/etc/opencode/opencode.json$"
   # `debug config` lists every config source the background server loaded.
-  workshop exec -- opencode debug config | MATCH '"path": "/etc/opencode/opencode.json"'
+  workshop exec -- opencode debug config \
+    | MATCH '"path": "/etc/opencode/opencode.json"'
+  # The bundled plugin pins the MCP OAuth callback port for tunnel forwarding.
+  workshop exec -- test -f /etc/opencode/plugins/mcp-oauth-port.js
+  workshop exec -- jq -e \
+    '.plugins | index("./plugins/mcp-oauth-port.js")' \
+    /etc/opencode/opencode.json
   workshop exec -- opencode service stop || true
 
 debug: |

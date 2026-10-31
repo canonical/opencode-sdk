@@ -31,6 +31,16 @@ fi
 # upstream fix lands (https://github.com/anomalyco/opencode/issues/51341, fix
 # in https://github.com/anomalyco/opencode/pull/51422). No SDK change is needed
 # once a fixed release is picked up by Renovate.
+# OpenCode 2.x picks an ephemeral OAuth callback port by default. Pin it to the
+# SDK's stable port so a workshop tunnel can forward the browser callback.
+install -D -m644 \
+	"${SDK}/mcp-oauth-port.js" \
+	/etc/opencode/plugins/mcp-oauth-port.js
+_merged=$(jq \
+	'.plugins = ((.plugins // []) + ["./plugins/mcp-oauth-port.js"] | unique)' \
+	"${_config}")
+echo "${_merged}" > "${_config}"
+
 if [[ "$(cut -d. -f1 "${SDK}/version")" == "2" ]]; then
 	cat <<EOF2 >>/etc/profile.d/opencode.sh
 export OPENCODE_CONFIG="${_config}"
