@@ -9,9 +9,6 @@
 summary: OpenCode completes MCP OAuth through the workshop callback tunnel
 
 prepare: |
-  rm -rf .workshop/mcp-oauth-fixture
-  mkdir -p .workshop
-  cp -a mcp-oauth-fixture .workshop/
   envsubst '${BASE}' <workshop.yaml.in >workshop.yaml
   workshop launch
 
