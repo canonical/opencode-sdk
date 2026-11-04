@@ -9,20 +9,25 @@ shape mirrors packages/core/test/mcp.test.ts.
 import argparse
 import json
 import secrets
-import socket
+import subprocess
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlencode, urlparse
 
 
 def local_ip():
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        sock.connect(("8.8.8.8", 80))
-        return sock.getsockname()[0]
-    except OSError:
-        return "127.0.0.1"
-    finally:
-        sock.close()
+    # Ask the routing table which source address the default route would
+    # use. The TEST-NET-1 destination (RFC 5737) is never contacted; it
+    # only selects the route.
+    result = subprocess.run(
+        ["ip", "route", "get", "192.0.2.1"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    fields = result.stdout.split()
+    if "src" in fields:
+        return fields[fields.index("src") + 1]
+    return "127.0.0.1"
 
 
 class State:
