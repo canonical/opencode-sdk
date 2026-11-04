@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -u
 
 if curl -fsS --max-time 2 http://127.0.0.1:18080/health >/dev/null 2>&1; then
 	workshopctl set-health okay

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -u
 
 mkdir -p "$HOME/.config/systemd/user"
 cat >"$HOME/.config/systemd/user/mcp-oauth-fixture.service" <<EOF
@@ -16,5 +16,4 @@ RestartSec=1
 WantedBy=default.target
 EOF
 
-systemctl --user daemon-reload
 systemctl --user enable --now mcp-oauth-fixture.service
