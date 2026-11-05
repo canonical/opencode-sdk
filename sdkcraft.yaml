@@ -29,6 +29,15 @@ plugs:
   # Opt-in access to the host desktop session, including the clipboard.
   desktop:
 
+slots:
+  # Exposes OpenCode's MCP OAuth callback listener so a host system plug can
+  # forward the browser redirect into the workshop. The SDK pins the callback
+  # to OpenCode's default loopback port. See:
+  # https://opencode.ai/docs/mcp-servers/#oauth
+  opencode-mcp-oauth-callback:
+    interface: tunnel
+    endpoint: localhost:19876
+
 parts:
   opencode:
     plugin: nil

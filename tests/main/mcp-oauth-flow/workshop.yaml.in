@@ -1,0 +1,10 @@
+name: test-opencode
+base: ${BASE}
+sdks:
+  - name: try-opencode
+  - name: project-mcp-oauth-fixture
+  - name: system
+    plugs:
+      opencode-mcp-oauth-callback:
+        interface: tunnel
+        endpoint: localhost:19876

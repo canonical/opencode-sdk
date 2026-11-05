@@ -32,11 +32,6 @@ This creates a basic OpenCode environment with an interactive action.
 | `2/stable` | 2.x |
 | `latest/stable` | 1.x (same revisions as `1/stable`) |
 
-On `2/stable`, the SDK's workshop instructions are not yet applied: OpenCode
-2.x ignores the `instructions` config key
-([anomalyco/opencode#51341](https://github.com/anomalyco/opencode/issues/51341)).
-They take effect once a fixed OpenCode release lands on the track.
-
 ---
 
 ## Using the SDK
@@ -71,6 +66,16 @@ no `save-state`/`restore-state` hooks are required or used.
 To configure API credentials, set the appropriate environment variable
 inside the workshop. You can pass it using the `--env` option with
 `workshop run` or `workshop exec`.
+
+### MCP OAuth callbacks
+
+Remote MCP servers that use OAuth redirect the browser to a loopback address
+inside the workshop. The tunnel slot below exposes that listener so a host
+system plug can forward the browser redirect into the workshop.
+
+See the
+[OpenCode MCP OAuth documentation](https://opencode.ai/docs/mcp-servers/#oauth)
+for the callback and authentication behaviour.
 
 ---
 
@@ -112,7 +117,28 @@ inside the workshop. You can pass it using the `--env` option with
 
 ## Slots (resources this SDK provides)
 
-This SDK doesn't define any slots.
+### `opencode-mcp-oauth-callback`
+
+- Interface: `tunnel`
+- Workshop endpoint: `localhost:19876`
+- Purpose: Exposes OpenCode's OAuth callback listener so the host can forward
+  a browser redirect into the workshop.
+
+A workshop definition connects it with a matching plug on the `system` SDK:
+
+```yaml
+sdks:
+  - name: opencode
+  - name: system
+    plugs:
+      opencode-mcp-oauth-callback:
+        interface: tunnel
+        endpoint: localhost:19876
+```
+
+The system plug listens on the host loopback address and forwards the callback
+to the workshop slot. With matching names and loopback endpoints, Workshop
+connects the tunnel automatically.
 
 ---
 
