@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Capture the URL instead of opening a browser. The Spread test acts as the
+# browser from the host so that the OAuth redirect travels through the tunnel.
+for arg in "$@"; do
+	case "$arg" in
+	http://* | https://*)
+		printf '%s\n' "$arg" >/tmp/mcp-auth-url
+		exit 0
+		;;
+	esac
+done
+
+exit 1
