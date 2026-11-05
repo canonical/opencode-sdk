@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -u
 
 _unit="$HOME/.config/systemd/user/opencode.service"
 mkdir -p "$(dirname "$_unit")"
