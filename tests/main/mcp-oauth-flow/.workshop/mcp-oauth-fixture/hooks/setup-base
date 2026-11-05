@@ -1,0 +1,15 @@
+#!/bin/bash
+set -u
+
+packages=()
+command -v python3 >/dev/null 2>&1 || packages+=(python3)
+command -v curl >/dev/null 2>&1 || packages+=(curl)
+command -v script >/dev/null 2>&1 || packages+=(util-linux)
+
+if [ "${#packages[@]}" -gt 0 ]; then
+	apt-get update
+	apt-get install -y "${packages[@]}"
+fi
+
+# Capture browser-open requests instead of launching a browser in the workshop.
+install -D -m755 "$SDK/xdg-open" /usr/local/bin/xdg-open
