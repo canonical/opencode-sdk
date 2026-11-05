@@ -11,7 +11,7 @@ restore: |
   workshop remove || true
 
 execute: |
-  ! workshop exec -- printenv OPENCODE_CONFIG
+  ! workshop exec -- printenv OPENCODE_CONFIG || false
   # Both versions include the resolved instruction path in debug output.
   workshop exec -- opencode debug config \
     | MATCH '/etc/opencode/instructions/workshop-prompt.md'
