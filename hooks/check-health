@@ -10,4 +10,15 @@ if [[ "$status" != http* ]]; then
   exit 0
 fi
 
+# The server activates location plugins asynchronously, and the model endpoint
+# is the readiness boundary for that generation. Probe it with a short timeout
+# so the hook returns within its window, while health stays waiting until the
+# project location can serve requests.
+if ! timeout 3 sudo -u workshop --login bash -c \
+  'cd /project && opencode models' >/dev/null 2>&1; then
+  workshopctl set-health --code="opencode-plugins-activating" waiting \
+    "OpenCode plugins are activating."
+  exit 0
+fi
+
 workshopctl set-health okay
