@@ -15,6 +15,11 @@ execute: |
   # Both versions include the resolved instruction path in debug output.
   workshop exec -- opencode debug config \
     | MATCH '/etc/opencode/instructions/workshop-prompt.md'
+  # The bundled plugin pins the MCP OAuth callback port for tunnel forwarding.
+  workshop exec -- test -f /etc/opencode/plugins/mcp-oauth-port.js
+  workshop exec -- jq -e \
+    '.plugins | index("./plugins/mcp-oauth-port.js")' \
+    /etc/opencode/opencode.json
 
 debug: |
   workshop exec -- cat /etc/profile.d/opencode.sh || true

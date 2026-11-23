@@ -35,9 +35,10 @@ execute: |
   workshop connections --all | MATCH opencode-mcp-oauth-callback
 
   workshop exec -- rm -f /tmp/mcp-auth-url /tmp/mcp-auth.log
-  # OpenCode 1.x opens the browser from its background server.
+  # Run OpenCode under a pseudo-terminal so it treats the session as
+  # interactive and opens the browser, which the fake xdg-open captures.
   workshop exec -- bash -lc \
-    'PATH=/usr/local/bin:$PATH opencode mcp auth test >/tmp/mcp-auth.log 2>&1' &
+    'PATH=/usr/local/bin:$PATH script -qec "opencode mcp auth test" /dev/null >/tmp/mcp-auth.log 2>&1' &
   AUTH_PID=$!
   trap 'kill "$AUTH_PID" || true' EXIT
 

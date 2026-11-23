@@ -1,11 +1,23 @@
-# check opencode is installed and available
-if [[ ! -f "${SDK}/bin/opencode" ]]; then
-  workshopctl set-health --code="opencode-not-installed" error "OpenCode not installed."
+if ! status="$(sudo -u workshop --login opencode service status 2>/dev/null)"; then
+  workshopctl set-health --code="opencode-service-unavailable" error \
+    "OpenCode service is unavailable."
   exit 0
 fi
 
-if ! sudo -u workshop --login which opencode >/dev/null 2>&1; then
-  workshopctl set-health --code="opencode-not-on-path" error "OpenCode not on \$PATH."
+if [[ "$status" != http* ]]; then
+  workshopctl set-health --code="opencode-service-not-running" waiting \
+    "OpenCode background service is starting."
+  exit 0
+fi
+
+# The server activates location plugins asynchronously, and the model endpoint
+# is the readiness boundary for that generation. Probe it with a short timeout
+# so the hook returns within its window, while health stays waiting until the
+# project location can serve requests.
+if ! timeout 3 sudo -u workshop --login bash -c \
+  'cd /project && opencode models' >/dev/null 2>&1; then
+  workshopctl set-health --code="opencode-plugins-activating" waiting \
+    "OpenCode plugins are activating."
   exit 0
 fi
 
